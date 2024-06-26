@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'/>
+    <title>麻将</title>
+    <meta name='viewport'
+          content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no'/>
+    <meta name="renderer" content="webkit"/>
+    <meta name='apple-mobile-web-app-capable' content='yes'/>
+    <meta name='full-screen' content='true'/>
+    <meta name='x5-fullscreen' content='true'/>
+    <meta name='360-fullscreen' content='true'/>
+    <meta name="laya" screenorientation="landscape"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta http-equiv='expires' content='0'/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link rel="stylesheet" type="text/css" href="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/css/hall.css">
+    <style type="text/css">
+        .btn {
+            background-image: url(http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/fz.png);
+        }
+
+        .pai {
+            background: url(http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/pai0.png) no-repeat;
+        }
+
+        #qrcode {
+            background-image: url(http://hai-bei.oss-cn-hangzhou.aliyuncs.com/qrcode.png);
+        }
+    </style>
+    <div class="img">
+        <img src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/comp5/bg/img_bg.png" alt="">
+        <span class="info">长按图片分享朋友</span>
+        <img id="img" src="" alt="">
+        <span class="close">关闭</span>
+    </div>
+    <div class="gameloadBg" style="display:none;width:100%;height:100%"></div>
+    <div class="gameBg" style="display:none;width:100%;height:100%"></div>
+    <div class="shareInfo cake"
+         style="width:123.5px;height:36.5px;position: fixed;z-index: 1100;right: 40px;top:13%;display:none;background: url(http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/nn_116.png) 0 0/100% 100%">
+    </div>
+    <div class="loadingBg" style="display:none"></div>
+    <div id="loading" style="display:none">
+        <img class="rodimg center" src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/loading.png">
+        <div class="pai center"></div>
+    </div>
+    <div class="btn" id="btn" data-clipboard-text="要复制的内容" style="cursor:pointer;"></div>
+    <div class="btn" id="room_btn" data-clipboard-text="要复制的内容" data-room="" style="cursor:pointer;display:none"></div>
+    <div class="btn_club" data-clipboard-text="要复制的内容" style="cursor:pointer;"></div>
+</head>
+
+<body class="black">
+<div id="QRCodeNone" class="qr-code"></div>
+<div id="qrcode" class="qr-code"></div>
+<div type="text" class="club" data-room="" id="copyList"></div>
+<div id="share_url" style="display:none"></div>
+<!--自己的俱乐部Id-->
+<div id="groupId" style="display:none">0</div>
+<!--前端客户唯一ID--前端发送这个内容给后端，，后端通过数据库唯一查询返回客户信息给前端-->
+<div id="un" style="display:none"></div>
+<!--房间ID--显示大厅的时候是空- 进入房间的时候才有数字-->
+<div id="room" style="display:none"></div>
+<!--//图片，js资源地址-->
+<div id="assets" style="display:none">http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4</div>
+<!--//图片，js资源地址-->
+<div id="path" style="display:none">res.ed010z.cn/chess/p2/</div>
+<!--//回调IP+端口 -->
+<div id="host" style="display:none"></div>
+<!--//游戏名称-->
+<div id="title" style="display:none"></div>
+<!--//房卡包编号-->
+<div id="cardno" style="display:none"></div>
+<!--//邀请函编号-->
+<div id="invitation" style="display:none"></div>
+<!--//卡牌皮肤编号-->
+<div id="skinno" style="display:none"></div>
+<!--//头像皮肤编号-->
+<div id="headno" style="display:none"></div>
+<!--//代理商编号-->
+<div id="site" style="display:none">qiezi</div>
+<!--//代理商秘钥  验证一下是否合法-->
+<div id="lkey" style="display:none"></div>
+<!--//散图地址-->
+<div id="comp" style="display:none">comp5</div>
+<!--//图集地址-->
+<div id="atlas" style="display:none">/res/atlas15</div>
+<!--//声音地址-->
+<div id="sounds" style="display:none">/sounds/</div>
+<!--//json-->
+<div id="json" style="display:none">/json1</div>
+
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://' + window.location.host + '/js/config.js?v=' + new Date().getTime() + '"> <\/script>');
+</script>
+<script type="text/javascript">
+    var BaseUrl = 'http://'+_wip+':'+_port; 
+    var code = getUrlParam("code");
+    let token = window.localStorage.getItem('token');
+    if (!token) {
+        var return_url = window.location.href;
+        window.localStorage.removeItem('return_url');
+        window.localStorage.setItem('return_url', window.location.href);
+        if (isWeiXin()) {
+            if (code) {
+                token = "{$token}";
+                if (token != "{$token}") {
+                    window.localStorage.setItem('token', token);
+                }
+            } else {
+                gotoWx();
+            }
+        }
+    }
+    if (token) {
+        let room = getUrlParam('room');
+        if (!room || room == null) {
+            window.location.href = 'http://' + window.location.hostname;
+        } else {
+            var req_url = BaseUrl + '/api/getroommj?room=' + room + '&tk=' + token;
+            if (token == '{$token}' && code) {
+                req_url = BaseUrl + '/api/getroommj?room=' + room + '&code=' + code;
+            }
+            var obj = aj(req_url);
+            if (obj.result != 0) {
+                document.getElementById("room").innerHTML = obj.data.room;
+                document.getElementById("share_url").innerHTML = window.location.href;
+                //document.getElementById("host").innerHTML = obj.data.host; 
+                document.getElementById("host").innerHTML = _wip+":"+obj.data.port+"/"+obj.data.gt+"/"+obj.data.dkey; 
+                document.getElementById("title").innerHTML = obj.data.title;
+                document.getElementById("un").innerHTML = obj.data.un;
+            }
+            if (code && obj.data.tk != "") {
+                token = obj.data.tk;
+                window.localStorage.setItem('token', obj.data.tk);
+            }
+        }
+    }
+
+    function aj(url) {
+        var xhr = createXHR();  //实例化XMLHttpRequest 对象
+        xhr.open("GET", url, false);  //建立连接，要求同步响应
+        xhr.send(null);  //发送请求
+        return JSON.parse(xhr.responseText);
+    }
+
+    function createXHR() {
+        var XHR = [  //兼容不同浏览器和版本得创建函数数组
+            function () {
+                return new XMLHttpRequest()
+            },
+            function () {
+                return new ActiveXObject("Msxml2.XMLHTTP")
+            },
+            function () {
+                return new ActiveXObject("Msxml3.XMLHTTP")
+            },
+            function () {
+                return new ActiveXObject("Microsoft.XMLHTTP")
+            }
+        ];
+        var xhr = null;
+        //尝试调用函数，如果成功则返回XMLHttpRequest对象，否则继续尝试
+        for (var i = 0; i < XHR.length; i++) {
+            try {
+                xhr = XHR[i]();
+            } catch (e) {
+                continue  //如果发生异常，则继续下一个函数调用
+            }
+            break;  //如果成功，则中止循环
+        }
+        return xhr;  //返回对象实例
+    }
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    function gotoWx() {
+        obj = aj(BaseUrl + '/wx/info');
+        if (obj.result != 0) {
+            var return_url = window.localStorage.getItem('return_url');
+            var rurl = return_url ? return_url : window.location.href;
+            var appid = obj.data.appid;
+            var sq = obj.data.sq;
+            var redirect_uri = 'http://' + sq + '/w.html?rurl=' + rurl;
+            window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + appid + '&redirect_uri=' + encodeURI(redirect_uri) + '&response_type=code&scope=snsapi_userinfo#wechat_redirect';
+        }
+    }
+
+    function isWeiXin() {
+        var ua = window.navigator.userAgent.toLowerCase();
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+            return true; // 是微信端
+        } else {
+            return false;
+        }
+    }
+</script>
+
+<script src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/js/qrcode.js"></script>
+<script src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/v3.4/js/code1.js?v=2019831"></script>
+<script src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/js/hall.js"></script>
+</body>
+
+</html>

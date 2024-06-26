@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%;overflow:hidden;">
+<head>
+    <meta charset='utf-8'/>
+    <title>大白鲨</title>
+    <meta name='viewport'
+          content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no'/>
+    <meta name='apple-mobile-web-app-capable' content='yes'/>
+    <meta name='full-screen' content='true'/>
+    <meta name='screen-orientation' content='portrait'/>
+    <meta name='x5-fullscreen' content='true'/>
+    <meta name='360-fullscreen' content='true'/>
+    <meta http-equiv='expires' content='0'/>
+    <div class="btn" style="cursor:pointer;"></div>
+    <style>
+        .btn {
+            position: fixed;
+            top: 10px;
+            right: 0;
+            width: 25px;
+            height: 120px;
+            border-radius: 13px 0 0 13px;
+            /*display: none;*/
+            z-index: 10000;
+            background-color: #ccc;
+            background-image: url(http://hai-bei.oss-cn-hangzhou.aliyuncs.com/fz.png);
+            background-size: 30px 120px;
+            background-position: -4px 0;
+        }
+
+        .copy-tip {
+            background: rgba(0, 0, 0, .6);
+            color: #fff;
+            position: fixed;
+            bottom: 6.6rem;
+            font-size: .9rem;
+            border-radius: 5px;
+            padding: 10px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            z-index: 89;
+        }
+    </style>
+</head>
+
+<body style="width:100%;height:100%;background-color:#000;text-align:center;overflow:hidden">
+<span class="copy-tip" id="tips" style="display:none">已复制到剪贴板</span>
+<div id="share_url" style="display:none"></div>
+<div id="jumpdomain" style="display:none"></div>
+<div id="bgdiv" style="position:absolute;left:0;right:0;bottom:0;top:0;margin:auto;"></div>
+<div id="un" style="display:none"></div>
+<div id="room" style="display:none"></div>
+<div id="assets" style="display:none">http://hai-bei.oss-cn-hangzhou.aliyuncs.com/res.ekmpvn20444.cn/fish/ttt</div>
+<div id="path" style="display:none">http://hai-bei.oss-cn-hangzhou.aliyuncs.com/res.ekmpvn20444.cn/fish/ttt/</div>
+<div id="host" style="display:none"></div>
+<div id="title" style="display:none"></div>
+<div id="cardno" style="display:none"></div>
+<div id="invitation" style="display:none"></div>
+<div id="skinno" style="display:none"></div>
+<div id="headno" style="display:none"></div>
+<div id="site" style="display:none">qabc_0003</div>
+<div id="lkey" style="display:none">u8Gj92y8</div>
+<div id="logintype" style="display:none">MicroMessenger</div>
+<div id="net" style="display:none;z-index:9999;position:absolute;left: 50%; top: 50%;transform: translate(-50%,-50%);">
+    <p style="color:#fff;">资源加载失败</p>
+    <button id="reloadtxt" type="button" onclick="reload();">刷新页面</button>
+    <br><br>
+    <button type="button" onclick="checknet();">检查网络情况</button>
+</div>
+<div id="loading"
+     style="display:none;z-index:9999;position:absolute;left: 50%; top: 50%;transform: translate(-50%,-50%);">
+    <img src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/res.n6689u.cn/ches/common/loading/loading1.gif"></img>
+</div>
+
+<!--<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>-->
+
+<!--wechat-->
+<script type="text/javascript">
+var _thost = 'http://' + window.location.host; 
+document.write('<script type="text/javascript" src="http://' + window.location.host + '/js/config.js?v=' + new Date().getTime() + '"> <\/script>');
+</script>
+<script type="text/javascript">
+    var BaseUrl = 'http://'+_wip+':'+_port; 
+    var code = getUrlParam("code");
+    let token = window.localStorage.getItem('token');
+    if (!token) {
+        var return_url = window.location.href;
+        window.localStorage.removeItem('return_url');
+        window.localStorage.setItem('return_url', window.location.href);
+        if (isWeiXin()) {
+            if (code) {
+                token = "{$token}";
+                if (token != "{$token}") {
+                    window.localStorage.setItem('token', token);
+                }
+            } else {
+                gotoWx();
+            }
+        }
+    }
+
+    if (token) {
+        let room = getUrlParam('room');
+        if (!room || room == null) {
+            window.location.href = 'http://' + window.location.hostname;
+        } else {
+            var req_url = BaseUrl + '/api/getroomdbs?room=' + room + '&tk=' + token;
+            if (token == '{$token}' && code) {
+                req_url = BaseUrl + '/api/getroomdbs?room=' + room + '&code=' + code;
+            }
+            var obj = aj(req_url);
+            if (obj.result != 0) {
+                document.getElementById("room").innerHTML = obj.data.room;
+                document.getElementById("share_url").innerHTML = window.location.href;
+                document.getElementById("host").innerHTML = _wip+":"+obj.data.port+"/"+obj.data.gt+"/"+obj.data.dkey; 
+                document.getElementById("title").innerHTML = obj.data.title;
+                document.getElementById("un").innerHTML = obj.data.un;
+            }
+
+            if (code && obj.data.tk != "") {
+                token = obj.data.tk;
+                window.localStorage.setItem('token', obj.data.tk);
+            }
+        }
+    }
+
+    function aj(url) {
+        var xhr = createXHR();  //实例化XMLHttpRequest 对象
+        xhr.open("GET", url, false);  //建立连接，要求同步响应
+        xhr.send(null);  //发送请求
+        return JSON.parse(xhr.responseText);
+    }
+
+    function createXHR() {
+        var XHR = [  //兼容不同浏览器和版本得创建函数数组
+            function () {
+                return new XMLHttpRequest()
+            },
+            function () {
+                return new ActiveXObject("Msxml2.XMLHTTP")
+            },
+            function () {
+                return new ActiveXObject("Msxml3.XMLHTTP")
+            },
+            function () {
+                return new ActiveXObject("Microsoft.XMLHTTP")
+            }
+        ];
+        var xhr = null;
+        //尝试调用函数，如果成功则返回XMLHttpRequest对象，否则继续尝试
+        for (var i = 0; i < XHR.length; i++) {
+            try {
+                xhr = XHR[i]();
+            } catch (e) {
+                continue  //如果发生异常，则继续下一个函数调用
+            }
+            break;  //如果成功，则中止循环
+        }
+        return xhr;  //返回对象实例
+    }
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    function gotoWx() {
+        obj = aj(BaseUrl + '/wx/info');
+        if (obj.result != 0) {
+            var return_url = window.localStorage.getItem('return_url');
+            var rurl = return_url ? return_url : window.location.href;
+            var appid = obj.data.appid;
+            var sq = obj.data.sq;
+            var redirect_uri = 'http://' + sq + '/w.html?rurl=' + rurl;
+            window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' + appid + '&redirect_uri=' + encodeURI(redirect_uri) + '&response_type=code&scope=snsapi_userinfo#wechat_redirect';
+        }
+    }
+
+    function isWeiXin() {
+        var ua = window.navigator.userAgent.toLowerCase();
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+            return true; // 是微信端
+        } else {
+            return false;
+        }
+    }
+
+    var errormsg = "";
+    window.onerror = function (msg, url, line, col, error) {
+        var errorinfo = {};
+        errorinfo.msg = msg;
+        errorinfo.url = url;
+        errorinfo.line = line;
+        errorinfo.col = col;
+        errorinfo.error = error;
+        console.log(arguments);
+        errormsg = errorinfo.toJSONString();
+    }
+    var count = 0;
+    var maxcount = 7;
+    var reloadInterval = setInterval(function () {
+        count++;
+        if (count > maxcount) {
+            var net = document.getElementById("net");
+            net.style.display = "block";
+            var load = document.getElementById("loading");
+            load.style.display = "none";
+            if (loadingInterval) clearInterval(loadingInterval);
+
+            var reloadflag = 6;
+            var reloadleft = reloadflag - (count - maxcount);
+            document.getElementById("reloadtxt").innerHTML = "刷新页面(" + reloadleft + "s)";
+            if (reloadleft < 1) {
+                clearreloadInterval();
+                reload();
+            }
+        }
+    }, 1000);
+    var loadingInterval;
+
+    function showloading(flag) {
+        var load = document.getElementById("loading");
+        if (flag) {
+            load.style.display = "block";
+        } else {
+            load.style.display = "none";
+            if (loadingInterval) clearInterval(loadingInterval);
+        }
+
+    }
+
+    showloading(true);
+
+    function setbg(url) {
+        clearreloadInterval();
+        var bgv = document.getElementById("bgdiv");
+        bgv.style.background = "url(" + url + ")";
+        bgv.style.backgroundRepeat = "no-repeat";
+        bgv.style.backgroundSize = "100% 100%";
+
+    }
+
+    function WeChat(url, title, img, desc) {
+        return;
+    }
+
+    var browser = {
+        versions: function () {
+            var u = navigator.userAgent, app = navigator.appVersion;
+            return {//移动终端浏览器版本信息
+                trident: u.indexOf('Trident') > -1, //IE内核
+                presto: u.indexOf('Presto') > -1, //opera内核
+                webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+                mobile: !!u.match(/AppleWebKit.*Mobile.*/) || !!u.match(/AppleWebKit/), //是否为移动终端
+                ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+                android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+                iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者QQHD浏览器
+                iPad: u.indexOf('iPad') > -1, //是否iPad
+                weixin: u.match(/MicroMessenger/i), //微信浏览器
+                webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+            };
+        }(),
+        language: (navigator.browserLanguage || navigator.language).toLowerCase()
+    };
+
+
+    function iswechatBrowser() {
+        if (browser.versions.weixin) return true;
+        else return false;
+    }
+
+    function checknet() {
+        var site = "qabc_0003";
+        window.location.href = "net.php?site=" + site;
+    }
+
+    function reload() {
+        var url = window.location.href;
+        if (url.indexOf("?") != -1) {
+            url = url + "&t=" + Math.random() * 99999;
+        } else {
+            url = url + "?t=" + Math.random() * 99999;
+        }
+        window.location.href = url;
+        //window.location.reload();
+    }
+
+    function clearreloadInterval() {
+        var net = document.getElementById("net");
+        if (net) {
+            net.style.display = "none";
+        }
+        if (reloadInterval) {
+            clearInterval(reloadInterval);
+            reloadInterval = 0;
+        }
+    }
+
+    function copyroomkey() {
+        var msg = document.title;
+        var roomkey = getQueryString("room");
+        if (roomkey != null && roomkey != "") {
+            msg = msg + ":[" + roomkey + "]";
+
+            var copyLink = document.getElementById("room_str");
+            copyLink.value = msg;
+
+            fuzhiMain.link(0);
+        }
+    }
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    function quitaccount() {
+        console.log("quit");
+        window.location.href = "/quit.php";
+    }
+</script>
+
+<script type="text/javascript"
+        src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/res.ekmpvn20444.cn/fish/ttt/core.js?v=201903261814"></script>
+
+<script>
+    function onBridgeReady() {
+        WeixinJSBridge.call('hideOptionMenu');
+    }
+
+    if (typeof WeixinJSBridge == "undefined") {
+        if (document.addEventListener) {
+            document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+        } else if (document.attachEvent) {
+            document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+            document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+        }
+    } else {
+        onBridgeReady();
+    }
+</script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+
+<script type="text/javascript"
+        src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/res.ekmpvn20444.cn/fish/ttt/fuzhi/jquery-1.9.1.min.js?v=201903261756"></script>
+<script type="text/javascript"
+        src="http://hai-bei.oss-cn-hangzhou.aliyuncs.com/js/clipboard.min.js?v=201903261756"></script>
+<script>
+    window.onload = function () {
+        var copyData = $("#title").context.title;
+        var clipboard = new Clipboard('.btn', {
+            // 点击copy按钮，直接通过text直接返回复印的内容$("#share_url").html()window.location.hre
+            text: function () {
+                return document.getElementById("title").innerHTML + "：" + copyData + $("#share_url").html();
+            }
+        });
+
+        clipboard.on('success', function (e) {
+            console.log(e);
+            $('#tips').show();
+            setTimeout(function () {
+                $('#tips').hide();
+            }, 2000);
+        });
+
+        clipboard.on('error', function (e) {
+            console.log(e);
+        });
+        setTimeout(function () {
+            var copyData = $("#title").context.title;
+            var clipboardB = new Clipboard('.btn', {
+                text: function () {
+                    return "：" + copyData + $("#share_url").html();
+                }
+            });
+            clipboardB.on('success', function (e) {
+                console.log(e);
+                $('#tips').show();
+                setTimeout(function () {
+                    $('#tips').hide();
+                }, 3000);
+            });
+
+            clipboardB.on('error', function (e) {
+                console.log(e);
+            });
+        }, 8000);
+    }
+</script>
+</body>
+</html>
